@@ -89,11 +89,14 @@ func IsUserCanceled(err error) bool {
 }
 
 // IsAuthFailed reports whether err represents a failed (not canceled)
-// authentication attempt.
+// authentication attempt: rejected biometry or biometry lockout.
+// Environment errors such as biometry-not-enrolled or passcode-not-set are
+// not authentication failures and are reported as-is.
 func IsAuthFailed(err error) bool {
 	if cfErr, ok := err.(*CFError); ok {
 		if cfErr.Domain == "com.apple.LocalAuthentication" {
-			return !IsUserCanceled(err)
+			// LAErrorAuthenticationFailed (-1), LAErrorBiometryLockout (-8).
+			return cfErr.Code == -1 || cfErr.Code == -8
 		}
 		return cfErr.Domain == "NSOSStatusErrorDomain" && cfErr.Code == int(ErrAuthFailed)
 	}

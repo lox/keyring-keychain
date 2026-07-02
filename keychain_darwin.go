@@ -611,7 +611,7 @@ func (k *keychain) maybeDecrypt(data []byte) ([]byte, error) {
 	}
 
 	debugf("Decrypting Secure Enclave protected item")
-	plaintext, err := sec.SecureEnclaveDecrypt(blob, ciphertext, k.auth())
+	plaintext, err := k.decryptWithAuth(blob, ciphertext)
 	if err != nil {
 		if sec.IsUserCanceled(err) || sec.IsAuthFailed(err) {
 			return nil, fmt.Errorf("%w: %w", ErrAccessDenied, err)
@@ -621,10 +621,13 @@ func (k *keychain) maybeDecrypt(data []byte) ([]byte, error) {
 	return plaintext, nil
 }
 
-// auth returns the shared authentication context, creating it on first use.
-// Reusing one context lets the system cache a successful authentication
-// across multiple reads instead of prompting for each item.
-func (k *keychain) auth() *sec.AuthContext {
+// decryptWithAuth decrypts under the shared authentication context, which is
+// created on first use. Reusing one context lets the system cache a
+// successful authentication across multiple reads instead of prompting for
+// each item. The lock is held for the whole operation so a concurrent Close
+// cannot release the context mid-decrypt; this also serializes decrypts,
+// which is harmless since authentication prompts are modal anyway.
+func (k *keychain) decryptWithAuth(blob, ciphertext []byte) ([]byte, error) {
 	k.authMu.Lock()
 	defer k.authMu.Unlock()
 	if k.authCtx == nil {
@@ -634,7 +637,7 @@ func (k *keychain) auth() *sec.AuthContext {
 		}
 		k.authCtx = sec.NewAuthContext(reason)
 	}
-	return k.authCtx
+	return sec.SecureEnclaveDecrypt(blob, ciphertext, k.authCtx)
 }
 
 // Close releases the authentication context, if any. The keyring remains
