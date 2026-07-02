@@ -49,3 +49,11 @@ ring, err := keyring.Open(ctx,
 should invalidate stored items. `AuthenticationReuse` can reuse recent
 authentication for protected reads. Data-protection mode does not support custom
 keychain files, synchronizable items, or legacy trusted-application ACLs.
+
+For local testing, use the tiny example CLI:
+
+```bash
+go run ./examples/keychain-cli -data-protection -user-presence set test-token secret
+go run ./examples/keychain-cli -data-protection -user-presence get test-token
+go run ./examples/keychain-cli -data-protection remove test-token
+```
