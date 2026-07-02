@@ -30,3 +30,22 @@ ring, err := keyring.Open(ctx,
 `keychain.Provider` accepts `Name`, `TrustApplication`, `Synchronizable`,
 `AccessibleWhenUnlocked`, and `Prompt` options. On non-macOS platforms, or when
 macOS cgo support is disabled, it returns `keyring.ErrUnavailable` during open.
+
+Use `DataProtection` to opt in to the macOS data-protection keychain. Add
+`RequireUserPresence` for Touch ID or device password authentication before
+secret reads:
+
+```go
+ring, err := keyring.Open(ctx,
+	keyring.WithServiceName("example"),
+	keyring.WithProvider(keychain.Provider(
+		keychain.DataProtection(),
+		keychain.RequireUserPresence(),
+	)),
+)
+```
+
+`RequireBiometryCurrentSet` is also available when Touch ID enrollment changes
+should invalidate stored items. `AuthenticationReuse` can reuse recent
+authentication for protected reads. Data-protection mode does not support custom
+keychain files, synchronizable items, or legacy trusted-application ACLs.
