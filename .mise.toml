@@ -1,3 +1,11 @@
 [tools]
 go = "1.25.11"
 golangci-lint = "2.12.2"
+
+[tasks."smoke:cli"]
+description = "Run the example CLI against the default macOS keychain"
+run = "scripts/smoke-cli.sh"
+
+[tasks."smoke:data-protection"]
+description = "Run the example CLI from a signed app bundle against the data-protection keychain"
+run = "scripts/smoke-data-protection.sh"

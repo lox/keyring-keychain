@@ -53,11 +53,19 @@ keychain files, synchronizable items, or legacy trusted-application ACLs.
 For local testing, use the tiny example CLI:
 
 ```bash
-go run ./examples/keychain-cli set test-token secret
-go run ./examples/keychain-cli get test-token
-go run ./examples/keychain-cli remove test-token
+mise run smoke:cli
 ```
 
 `-data-protection` and the Touch ID flags require the example to run as a signed
 macOS app with a `keychain-access-groups` entitlement. `go run` builds an
 unsigned temporary command, so macOS returns `errSecMissingEntitlement`.
+
+To smoke test the data-protection path, point `KEYCHAIN_CLI_PROFILE` at a macOS
+provisioning profile with Keychain Sharing enabled:
+
+```bash
+KEYCHAIN_CLI_PROFILE=/path/to/profile.provisionprofile mise run smoke:data-protection
+```
+
+Set `KEYCHAIN_CLI_SIGN_IDENTITY` if the default codesigning identity is not the
+one that matches the profile.

@@ -24,6 +24,7 @@ func run(ctx context.Context, args []string) error {
 	flags.SetOutput(os.Stderr)
 
 	service := flags.String("service", "keyring-keychain-example", "keychain service name")
+	trustApplication := flags.Bool("trust-application", false, "trust the calling application for legacy keychain items")
 	dataProtection := flags.Bool("data-protection", false, "use the macOS data-protection keychain")
 	userPresence := flags.Bool("user-presence", false, "require Touch ID or device password for reads")
 	biometry := flags.Bool("biometry-current-set", false, "require the current Touch ID enrollment for reads")
@@ -45,6 +46,9 @@ func run(ctx context.Context, args []string) error {
 	}
 
 	opts := []keychain.Option{}
+	if *trustApplication {
+		opts = append(opts, keychain.TrustApplication(true))
+	}
 	if *dataProtection {
 		opts = append(opts, keychain.DataProtection())
 	}
