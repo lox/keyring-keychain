@@ -2,6 +2,7 @@ package keychain
 
 import (
 	"context"
+	"io"
 
 	"github.com/lox/keyring/v2"
 )
@@ -17,6 +18,7 @@ type Config struct {
 	KeychainSynchronizable         bool
 	KeychainAccessibleWhenUnlocked bool
 	KeychainPasswordFunc           keyring.PromptFunc
+	TouchID                        *TouchIDConfig
 }
 
 func Name(name string) Option {
@@ -116,4 +118,13 @@ func (a adapter) Metadata(ctx context.Context, key string) (keyring.Metadata, er
 		return keyring.Metadata{}, err
 	}
 	return a.ring.GetMetadata(key)
+}
+
+// Close releases any resources held by the underlying keyring, such as the
+// authentication context used for Touch ID protected items.
+func (a adapter) Close() error {
+	if closer, ok := a.ring.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
 }

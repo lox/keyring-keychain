@@ -32,6 +32,13 @@ linters:
           disabled: true
         - name: package-comments
           disabled: true
+  exclusions:
+    rules:
+      # gocritic misfires on cgo call expansions in the Security framework
+      # bindings (dupSubExpr on generated code).
+      - path: internal/sec/
+        linters:
+          - gocritic
 
 formatters:
   enable:
