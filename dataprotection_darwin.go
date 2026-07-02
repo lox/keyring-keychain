@@ -69,6 +69,8 @@ type dataProtectionKeychain struct {
 
 type keychainStatusError int32
 
+const errSecMissingEntitlementStatus int32 = -34018
+
 func openDataProtectionKeychain(cfg Config) (backendKeyring, error) {
 	if err := validateDataProtectionConfig(cfg); err != nil {
 		return nil, err
@@ -393,6 +395,8 @@ func checkKeychainStatus(status C.OSStatus) error {
 		return ErrKeyNotFound
 	case int32(C.errSecDuplicateItem):
 		return errKeychainDuplicateItem
+	case errSecMissingEntitlementStatus:
+		return fmt.Errorf("%w: data protection keychain requires a signed app with keychain-access-groups entitlement", ErrAccessDenied)
 	}
 
 	err := keychainStatusError(status)
@@ -404,7 +408,7 @@ func checkKeychainStatus(status C.OSStatus) error {
 
 func isAccessDeniedStatus(status C.OSStatus) bool {
 	switch int32(status) {
-	case -128, -25244, -34018, int32(C.errSecAuthFailed), int32(C.errSecInteractionNotAllowed), int32(C.errSecNoAccessForItem):
+	case -128, -25244, errSecMissingEntitlementStatus, int32(C.errSecAuthFailed), int32(C.errSecInteractionNotAllowed), int32(C.errSecNoAccessForItem):
 		return true
 	default:
 		return false

@@ -53,7 +53,11 @@ keychain files, synchronizable items, or legacy trusted-application ACLs.
 For local testing, use the tiny example CLI:
 
 ```bash
-go run ./examples/keychain-cli -data-protection -user-presence set test-token secret
-go run ./examples/keychain-cli -data-protection -user-presence get test-token
-go run ./examples/keychain-cli -data-protection remove test-token
+go run ./examples/keychain-cli set test-token secret
+go run ./examples/keychain-cli get test-token
+go run ./examples/keychain-cli remove test-token
 ```
+
+`-data-protection` and the Touch ID flags require the example to run as a signed
+macOS app with a `keychain-access-groups` entitlement. `go run` builds an
+unsigned temporary command, so macOS returns `errSecMissingEntitlement`.
