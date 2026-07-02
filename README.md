@@ -159,6 +159,28 @@ the calling binary and reason), and under `TouchIDPolicyUserPresence` the
 account password is an accepted fallback. `TouchIDPolicyBiometryCurrentSet`
 additionally binds keys to the fingerprint set enrolled at write time.
 
+## Demo CLI
+
+A small CLI in [`cmd/keychain-demo`](cmd/keychain-demo/main.go) exercises the
+provider:
+
+```bash
+# Regular keychain items
+echo -n hunter2 | go run ./cmd/keychain-demo set llamas
+go run ./cmd/keychain-demo get llamas
+go run ./cmd/keychain-demo ls
+go run ./cmd/keychain-demo rm llamas
+
+# Touch ID protected items (get prompts for authentication)
+echo -n hunter2 | go run ./cmd/keychain-demo -touchid set llamas
+go run ./cmd/keychain-demo -touchid -reason "read the demo secret" get llamas
+
+go run ./cmd/keychain-demo available
+```
+
+See `go run ./cmd/keychain-demo -h` for service, custom keychain, and policy
+flags.
+
 ## Development
 
 ```bash
